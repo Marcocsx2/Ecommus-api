@@ -1,0 +1,33 @@
+import { User } from '../../resources/models';
+import catchAsync from '../../utils/catchAsync';
+import { verifyToken } from '.';
+
+const protect = catchAsync(
+  'Error in protect controller',
+  async (req, res, next) => {
+    const bearer = req.headers.authorization;
+
+    if (!bearer || !bearer.startsWith('Bearer ')) {
+      return res.status(401).end('Unauthorized');
+    }
+
+    const token = bearer.split('Bearer ')[1].trim();
+    let payload;
+
+    payload = await verifyToken(token);
+
+    const user = await User.findById(payload.id)
+      .select('-password')
+      .lean()
+      .exec();
+
+    if (!user) {
+      return res.status(401).end('User undefined');
+    }
+
+    req.user = user;
+    next();
+  }
+);
+
+export { protect };
