@@ -10,4 +10,4 @@ export NVM_DIR="$HOME/.nvm"
 
 npm install
 
-npm run build
+npm run --max-old-space-size=8192 build
